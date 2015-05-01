@@ -1,6 +1,6 @@
 <TeXmacs|1.99.2>
 
-<style|article>
+<style|<tuple|article|algorithm>>
 
 <\body>
   \;
@@ -505,6 +505,35 @@
     <item>Does not have multiply matches in a single view i.e distinct
   </itemize-dot>
 
+  <\algorithm*>
+    <samp|inliers> := input tracks
+
+    <samp|cameras> := input cameras
+
+    <strong|do>:\ 
+
+    <\indent>
+      spsrse bundle adjustment (<samp|cameras>, <samp|inliers>)
+
+      <strong|for each> camera <samp|vi>:
+
+      <\indent>
+        <math|d<rsub|80>> := 80 percentile of reprojection error
+
+        <samp|threshold> := <math|clamp<around*|(|d<rsub|80>,4,16|)>>
+
+        <samp|<math|outliers <rsub|vi> > >:= tracks with reprojection error
+        larger then <samp|threshold>
+      </indent>
+
+      <samp|outliers> := <samp|<math|<big|cup>outliers<rsub| vi>>>
+
+      <samp|inliers> := <samp|inliers> - <samp|outliers>
+    </indent>
+
+    <strong|while> <samp|outliers> is not empty
+  </algorithm*>
+
   <subsection|Match Tracks>
 
   To select the desirable tracks, first match features for each pair of
@@ -684,7 +713,7 @@
     <associate|auto-29|<tuple|2|9>>
     <associate|auto-3|<tuple|1|2>>
     <associate|auto-30|<tuple|3|9>>
-    <associate|auto-31|<tuple|3|11>>
+    <associate|auto-31|<tuple|3|9>>
     <associate|auto-32|<tuple|3|?>>
     <associate|auto-33|<tuple|10.4|?>>
     <associate|auto-34|<tuple|10.5|?>>
@@ -696,11 +725,11 @@
     <associate|auto-7|<tuple|3.1.2|3>>
     <associate|auto-8|<tuple|3.1.3|3>>
     <associate|auto-9|<tuple|3.1.4|4>>
-    <associate|bib-handheld|<tuple|4|11>>
-    <associate|bib-lma|<tuple|2|11>>
-    <associate|bib-modeltheworld|<tuple|3|11>>
+    <associate|bib-handheld|<tuple|4|9>>
+    <associate|bib-lma|<tuple|2|9>>
+    <associate|bib-modeltheworld|<tuple|3|9>>
     <associate|bib-pmvspaper|<tuple|1|?>>
-    <associate|bib-sift|<tuple|1|11>>
+    <associate|bib-sift|<tuple|1|9>>
   </collection>
 </references>
 

@@ -156,8 +156,52 @@
 
     <item><code*|Calibration Matrix(K)> -- <math|x =K X<rsub|cam>>\ 
 
-    <item><code*|Camera/Projection Matrix(P)> -- <math|x=P X = K<around*|[|R
-    ,t|]>X>
+    <item><code*|Projection Matrix(P)> -- <math|x=P X = K<around*|[|R ,t|]>X>
+  </itemize>
+
+  <subsubsection|Camera Model>
+
+  Camera model have multiple forms
+
+  <\itemize>
+    <item><code*|Standard Linear Projective Camera Model (Undistroted)>
+
+    <\itemize-dot>
+      <item><code*|Rotation Matrix (R)>\ 
+
+      <item><code*|Translation Vector (t)>\ 
+
+      <item><code*|Calibration Matrix (K)>
+
+      <item><code*|Projection Matrix (<math|>P=K[R,t])>
+    </itemize-dot>
+
+    <item><code*|Parameterized Full Camera (with distortion)> - 11 variables
+
+    <\itemize-dot>
+      <item><code*|Euler Angles (r)> - 3 variables
+
+      <item><code*|Translation Vector (t)> - 3 variables
+
+      <item><code*|Principal Point (px, py)> - 2 variables
+
+      <item><code*|Focal Length (f)> - 1 variable
+
+      <item><code*|Radial Distortion (k1, k2)> - 2 variables
+    </itemize-dot>
+  </itemize>
+
+  Parameterized full camera with ditortion is only used during camera
+  registration. Distortion is ignored before camera registration; after
+  registration cameras are undistorted to be both convenient and accurate.
+  Conversions between two models:
+
+  <\itemize>
+    <item><code*|QR decomposition can be used to obtain K, R and t from P.>\ 
+
+    <item><code*|K and (focal, px, py) can interchange.>
+
+    <item><code*|Undistort the images accroding to (k1, k2).>
   </itemize>
 
   <subsubsection|View Constrains>
@@ -257,25 +301,6 @@
     <matrix|<tformat|<twith|table-min-cols|4>|<table|<row|<cell|a<rsub|11>>|<cell|a<rsub|12>>|<cell|a<rsub|13>>|<cell|a<rsub|14>>>|<row|<cell|a<rsub|21>>|<cell|a<rsub|22>>|<cell|a<rsub|23>>|<cell|a<rsub|24>>>|<row|<cell|a<rsub|31>>|<cell|a<rsub|32>>|<cell|a<rsub|33>>|<cell|a<rsub|34>>>>>>=<wide|x|^>X<rsup|T>
   </equation*>
 
-  <subsubsection|Triangulation (DLT)>
-
-  Recover the coordinate of a point in the world coordiante system from two
-  calibrated camera and th projection coordinates of the point on each image
-  plane. The constrains can be written as:\ 
-
-  <\equation*>
-    <choice|<tformat|<table|<row|<cell|x<rsub|l>=P<rsub|l>
-    X<rsub|l>>>|<row|<cell|x<rsub|r>=P<rsub|r> X<rsub|r>>>>>>
-  </equation*>
-
-  A linear equation can be obtained.
-
-  <\equation*>
-    <matrix|<tformat|<table|<row|<cell|>>>>> P=A P=0
-  </equation*>
-
-  and the solution of P can be found by SVD the matrix <math|A<rsup|T>A>.
-
   <subsubsection|Standard Stereo Rectification>
 
   Rectification is the process of changing the relative pose of a pair of
@@ -336,7 +361,7 @@
   break out the loop and filter the dataset with this estimated constrain,
   and filter out the outliers using the estimated constrain.
 
-  <subsection|Bundle Adjustment>
+  <subsection|Sparse Bundle Adjustment>
 
   Levenberg-Marqurdt Algorithm (LM) is the strategy we choose to perform
   non-linear optimization. Its the process to find the optimal solution so
@@ -505,6 +530,10 @@
     <item>Does not have multiply matches in a single view i.e distinct
   </itemize-dot>
 
+  <subsection|Bundle Adjustment>
+
+  \;
+
   <\algorithm*>
     <samp|inliers> := input tracks
 
@@ -585,20 +614,11 @@
   applied. Repeat the process above until all cameras are registered or no
   camera observes enough tracks left.
 
-  <section|Stereopsis>
+  <section|Beyoned Sparse>
 
-  Stereopsis phase genterates a dense point cloud. It first locally
-  reconstruct each two-view stereo, then merge them together with global
-  constrians. Such as depth, visibility and epipolar constrain.
-
-  <subsection|Normalized Cross Correlation (NCC)>
-
-  <subsection|Multi-View Stereo>
-
-  merge the two view stereos together. In two-view stereo matching process,
-  points are triangulated within the two-view domain. From the matching lists
-  we find all matches for a specific point and choose the optimal baseline
-  then triangulate it again.
+  Currently WebSFM does not handle reconstructionn beyoned sparse. PMVS/CMVS
+  can generate dense oriented point cloud, which can then be used to surface
+  polygon reconstruction using Pission.\ 
 
   <section|Application Framework>
 
@@ -703,14 +723,14 @@
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-20|<tuple|5.2|7>>
     <associate|auto-21|<tuple|5.3|7>>
-    <associate|auto-22|<tuple|6|8>>
-    <associate|auto-23|<tuple|6.1|8>>
-    <associate|auto-24|<tuple|6.2|8>>
-    <associate|auto-25|<tuple|7|8>>
-    <associate|auto-26|<tuple|7.1|8>>
-    <associate|auto-27|<tuple|7.2|8>>
-    <associate|auto-28|<tuple|7.3|9>>
-    <associate|auto-29|<tuple|2|9>>
+    <associate|auto-22|<tuple|5.4|8>>
+    <associate|auto-23|<tuple|6|8>>
+    <associate|auto-24|<tuple|7|8>>
+    <associate|auto-25|<tuple|7.1|8>>
+    <associate|auto-26|<tuple|7.2|8>>
+    <associate|auto-27|<tuple|7.3|8>>
+    <associate|auto-28|<tuple|2|9>>
+    <associate|auto-29|<tuple|3|9>>
     <associate|auto-3|<tuple|1|2>>
     <associate|auto-30|<tuple|3|9>>
     <associate|auto-31|<tuple|3|9>>

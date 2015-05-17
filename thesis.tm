@@ -209,58 +209,9 @@
 
   <subsection|SIFT (Scale Invariant Feature Transform)><label|4.1>
 
-  Features obtained from SIFT<cite|sift> is scale invariant, which means
-  features can be found and matched regardless what scale it is in. To
-  accomplish that, we need to find feature points in LoGs (Laplacian of
-  Guassian) of the image, due to the complexity of computing the second
-  derivative of an image, we use DoGs(Difference of Guassian) to approximate.
-  This is acomplished by using a series of octaves and scales of the original
-  image, they simulates the image in various scales. We use 4 octave times 5
-  scales as Lowe's <cite|sift> paper suggested.
-
-  To construct octave space, we directly shrink size of the image by half,
-  each pixel is obtained by averaging the grayscale value of its window.In
-  each octave, scalespace are constructed by convolution of the image with a
-  series of a guassian kernels. The sigma of the guassian kernel is based on
-  the relation between sigma of LoG and DoG.
-
-  <\eqnarray*>
-    <tformat|<table|<row|<cell|L<rsub|\<b-sigma\>>=\<nabla\><rsup|2>G<rsub|\<b-sigma\>>=G<rsub|\<b-sigma\>1>-G<rsub|\<b-sigma\>2>>|<cell|>|<cell|\<b-sigma\><rsub|1>=\<b-sigma\>/<sqrt|2>
-    , \<b-sigma\><rsub|2>=<sqrt|2>\<b-sigma\>>>>>
-  </eqnarray*>
-
-  Sigma of guassian kernels in each octave is propotional by the factor of 2
-  to satisfy the euqation above. After scalespaces are obtained, we can
-  approximate LoG using DoG (Difference of Guassian) between adjacent scales.
-
-  Afterwards, several filters are applied to choose high quality feature
-  points. Contract filter \ will only accept maxium and minimum points in the
-  DoG pyramid i.e. <math|3\<times\>3\<times\>3> window around the point.
-  Corner filter will only accept corner by comparing the derivative of the
-  point on each direction. Finally, scale invariant feature points are
-  selected.\ 
-
-  After finding scale inavriant feature points, we assign each feature point
-  with an orientation from its neighborhood, then assign a discriptor to the
-  point according to its orientation and neighborhood, so the descriptor is
-  self-oriented, can be matched regardless the orientation of \ images. All
-  following process are done in the DoG image where the point is found.\ 
-
-  To calculate the orientation, we collect the gradients inside a window
-  around the feature point and construct a histogram of gradient
-  orientations, where orientations are divided into 36 discrete bins. All
-  directions over 80% of the maxium is considered an valid orientation, which
-  means one feaure point might coorespond to several oriented feature points.
-
-  Finally, to calculate the descriptor, we collect gradient informations from
-  a <math|16\<times\>16> window around the point aligned with its
-  orientation. Gradient dirction are guass-weighted and relative to the
-  orientation of feaure point. The window is then divided into a
-  <math|4\<times\>4> grid of <math|4\<times\>4> sub-windows. In each
-  sub-window, collect the histogram of gradient orientations with 8 bins.
-  Afterwards, it will yield <math|16\<times\>8=128> numbers as the
-  descripter. Finally, achive illumination invariant by normalizing the
-  descriptor.
+  WebSFM uses lowe's SIFT<cite|sift> as its feature extractor. SIFT features
+  can be detected and matched regardless of its scale, orientation or
+  lighting, following is an overview of SIFT algorithm: \ 
 
   <\named-algorithm>
     SIFT
@@ -305,13 +256,13 @@
     <strong|end for>
   </named-algorithm>
 
-  SIFT will generate a huge amount of feature points, it will be used in both
-  camera registration phase and stereopsis phase. But only a small subset of
-  features will be used in the camera registration phase, it's because of
-  camera registratration need features that are globally unique, so it can be
-  used to esitimate camera pose and parameters.\ 
-
-  \;
+  Octave space start at -1 or 0, start at -1 if image is too small. In each
+  octave, we will scan 3 DoG layers, which requires 5 layers in DoG space,
+  and 6 layers in Guassian space. When bluring the image, larger sigma means
+  larger kernel size, then directly leads to more time consumption, so blur
+  is done progressively to keep sigma relatively small. We use default
+  descriptor size stated in lowe's original paper,
+  <math|4\<times\>4\<times\>8> histagram and 128 dimensional Uint8 vector.
 
   <subsection|Robust Two-View Analysis><label|4.2>
 
@@ -347,7 +298,7 @@
   filtered, we also merged two-view matches into a global image connectivity
   graph and global tracks, which can be used in next phase.
 
-  <subsection|Incremental Camera Registration><label|4.3>
+  <subsection|Incremental Sparse Reconstruction><label|4.3>
 
   After the intial pair of cameras and tracks are registered, we can
   calibrate the rest of cameras one by one.\ 
@@ -374,32 +325,6 @@
   are given by mm, and most EXIF tag does not have CCD size or alternative
   attributes which allow us to calculate focal length in pixel, so we have to
   esitimate it by track coorespondence.
-
-  Extrinsic calibration will recover the rotation matrix R and translation
-  vector t. They can be extracted from both projection matrix and essential
-  matrix, depend on the choice of algorithm.
-
-  Camera parameters are very sensitive in view geometry, it will affect the
-  estimated cooridante of every point it observes, and the relative pose
-  bwtween cameras, consequently affect the entire system. Although bundle
-  adjustment can refine the parameters, but sparse bundle adjustment only
-  promises local optimization, the inital solution is still critical.\ 
-
-  On the other hand, each image yields up to 10,000 features, but camera
-  calibration algorithms require only a very small amount of matches e.g.
-  DLT, 5-point-algorithm, so outliers in the input may affetct the result
-  dramatically.
-
-  So, from all points the feature extractor provides, choose matches with
-  high percision, high contrast and globally unique is a crutial part of
-  camera registration, and those points are called tracks, A track represents
-  a distinct point in the scene, it have following constrains:
-
-  <\itemize-dot>
-    <item>Satisfy all geometric constrains
-
-    <item>Does not have multiply matches in a single view i.e distinct
-  </itemize-dot>
 
   <\named-algorithm>
     Incremental Sparse Reconstruction

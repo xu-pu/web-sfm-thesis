@@ -185,39 +185,38 @@
 
   <new-page>
 
-  <section|Structure from Motion Pipeline>
+  <section|Pipeline>
 
-  Our structure from motion pipline is largely based on Bundler
+  Structure from motion pipline of WebSFM is largely based on Bundler.
 
-  First generate SIFT features for each image, details in section 4.1.\ 
+  First generate SIFT features for each image (details in <reference|4.1>),
+  then perform robust two view analysis on each pair of images (details in
+  <reference|section 4.2>).\ 
 
-  Then perform ANN feature matching between each pair of images, and analyze
-  robust two-view geometry my RANSAC ans eight-point-algorithm with RANSAC to
-  filter out the oulier matches, then refine the estimated fundamental matrix
-  using LMA for later use.\ 
+  A track represents a point in the 3D space, it has one or no view on an
+  image, we will find tracks by merging two view matches to a graph and
+  traversing the match graph, tracks that have more than one view on a single
+  image is excluded as an obvious outlier.
 
-  Then we merge the robust two-view matchings into tracks. A track represents
-  a point in the 3D space, it is obtained by finding feature points on images
-  that matches with each other. Finding tracks from two-view matches is an
-  obvious graph traverse problem. In addition, we exclude tracks that have
-  more than one view on an image as an outlier.
-
-  Tracks are used to initiate camera registration.\ 
+  Tracks are then used to initiate camera registration. We first choose a
+  pair of camera to initiate. After initiation, incremental recovery is
+  performed (details in <reference|4.3>), and sparse reconstruction is
+  obtained.
 
   Currently WebSFM does not handle reconstruction beyoned sparse. PMVS/CMVS
-  can generate dense oriented point cloud, which can then be used to surface
-  polygon reconstruction using Pission.\ 
+  can generate dense oriented point cloud, which can then be used to recover
+  surface polygon using Pission surface reconstruction.
 
-  <subsection|SIFT (Scale Invariant Feature Transform)>
+  <subsection|SIFT (Scale Invariant Feature Transform)><label|4.1>
 
-  Features obtained from SIFT is scale invariant, which means features can be
-  found and matched regardless what scale it is in. To accomplish that, we
-  need to find feature points in LoGs (Laplacian of Guassian) of the image,
-  due to the complexity of computing the second derivative of an image, we
-  use DoGs(Difference of Guassian) to approximate. This is acomplished by
-  using a series of octaves and scales of the original image, they simulates
-  the image in various scales. We use 4 octave times 5 scales as Lowe's
-  <cite|sift> paper suggested.
+  Features obtained from SIFT<cite|sift> is scale invariant, which means
+  features can be found and matched regardless what scale it is in. To
+  accomplish that, we need to find feature points in LoGs (Laplacian of
+  Guassian) of the image, due to the complexity of computing the second
+  derivative of an image, we use DoGs(Difference of Guassian) to approximate.
+  This is acomplished by using a series of octaves and scales of the original
+  image, they simulates the image in various scales. We use 4 octave times 5
+  scales as Lowe's <cite|sift> paper suggested.
 
   To construct octave space, we directly shrink size of the image by half,
   each pixel is obtained by averaging the grayscale value of its window.In
@@ -240,8 +239,6 @@
   Corner filter will only accept corner by comparing the derivative of the
   point on each direction. Finally, scale invariant feature points are
   selected.\ 
-
-  \;
 
   After finding scale inavriant feature points, we assign each feature point
   with an orientation from its neighborhood, then assign a discriptor to the
@@ -316,7 +313,7 @@
 
   \;
 
-  <subsection|Robust Two-View Analysis>
+  <subsection|Robust Two-View Analysis><label|4.2>
 
   Two-view constrains:
 
@@ -350,25 +347,7 @@
   filtered, we also merged two-view matches into a global image connectivity
   graph and global tracks, which can be used in next phase.
 
-  <subsection|Register the First Pair of Cameras>
-
-  The first pair of camera is crutial, we need to calibrate the inital pair
-  of cameras and triangulate the inital set of tracks, it will be used in the
-  incremental recovery phase to calibrate new cameras.
-
-  We first guess the focal length in pixel. Then use 8-point-algorithm to
-  estimate the fundamental matrix of the inital pair, and obtain its
-  essential matrix using the guessed focal length, set one of the cmaera's
-  local coordinate system as the world coordinate system i.e. set its
-  rotation as I and translation as 0. Then carry out the other camera's
-  extrinsic parameters from essential matrix. Then we select the tracks that
-  are visible in this pair of cameras, and triangulate their world
-  coordinates. Finally a global bundle adjustment is applied to refine the
-  parameters, especially the focal length.
-
-  \;
-
-  <subsection|Incremental Camera Registration>
+  <subsection|Incremental Camera Registration><label|4.3>
 
   After the intial pair of cameras and tracks are registered, we can
   calibrate the rest of cameras one by one.\ 
@@ -496,6 +475,8 @@
     <strong|until> <var|ouliers> is empty
   </named-algorithm>
 
+  <new-page>
+
   <section|Application Framework>
 
   <subsection|Parallelization>
@@ -532,23 +513,15 @@
 
   <subsection|Demos>
 
-  <\bibliography|bib|tm-bibtex|thesis.bib>
-    <\bib-list|4>
+  <\bibliography|bib|tm-plain|thesis.bib>
+    <\bib-list|2>
       <bibitem*|1><label|bib-sift>Distinctive image features from
       scale-invariant keypoints.<newblock> <with|font-shape|italic|IJCV>, ,
       2004.<newblock>
 
-      <bibitem*|2><label|bib-lma>The design and implementation of a generic
-      sparse bundle adjustment software package based on the
-      levenberg-marquardt algorithm.<newblock> <with|font-shape|italic|>, ,
-      2004.<newblock>
-
-      <bibitem*|3><label|bib-modeltheworld>Modeling the world from internet
+      <bibitem*|2><label|bib-modeltheworld>Modeling the world from internet
       photo collections.<newblock> <with|font-shape|italic|>, ,
       2007.<newblock>
-
-      <bibitem*|4><label|bib-handheld>Visual modeling with a hand-held
-      camera.<newblock> <with|font-shape|italic|>. <newblock>
     </bib-list>
   </bibliography>
 </body>
@@ -561,14 +534,17 @@
 
 <\references>
   <\collection>
+    <associate|4.1|<tuple|4.1|4>>
+    <associate|4.2|<tuple|4.2|5>>
+    <associate|4.3|<tuple|4.3|5>>
     <associate|auto-1|<tuple|1|2>>
-    <associate|auto-10|<tuple|4.3|4>>
-    <associate|auto-11|<tuple|4.4|5>>
-    <associate|auto-12|<tuple|4.5|5>>
-    <associate|auto-13|<tuple|5|6>>
-    <associate|auto-14|<tuple|5.1|6>>
-    <associate|auto-15|<tuple|5.2|6>>
-    <associate|auto-16|<tuple|5.3|7>>
+    <associate|auto-10|<tuple|4.3|5>>
+    <associate|auto-11|<tuple|4.4|6>>
+    <associate|auto-12|<tuple|5|7>>
+    <associate|auto-13|<tuple|5.1|7>>
+    <associate|auto-14|<tuple|5.2|7>>
+    <associate|auto-15|<tuple|5.3|7>>
+    <associate|auto-16|<tuple|5.4|7>>
     <associate|auto-17|<tuple|5.4|7>>
     <associate|auto-18|<tuple|5.4|7>>
     <associate|auto-19|<tuple|5.4|7>>
@@ -596,12 +572,13 @@
     <associate|auto-6|<tuple|3.2|3>>
     <associate|auto-7|<tuple|4|4>>
     <associate|auto-8|<tuple|4.1|4>>
-    <associate|auto-9|<tuple|4.2|4>>
-    <associate|bib-handheld|<tuple|4|8>>
-    <associate|bib-lma|<tuple|2|8>>
-    <associate|bib-modeltheworld|<tuple|3|8>>
+    <associate|auto-9|<tuple|4.2|5>>
+    <associate|bib-handheld|<tuple|4|7>>
+    <associate|bib-lma|<tuple|2|7>>
+    <associate|bib-modeltheworld|<tuple|2|7>>
     <associate|bib-pmvspaper|<tuple|1|?>>
-    <associate|bib-sift|<tuple|1|8>>
+    <associate|bib-sift|<tuple|1|7>>
+    <associate|section 4.2|<tuple|4.2|?>>
   </collection>
 </references>
 
@@ -620,11 +597,6 @@
     </associate>
     <\associate|figure>
       <tuple|normal|Framework of WebSFM|<pageref|auto-3>>
-
-      <tuple|normal|Two view matching using features generated by Lowe's
-      SIFT|<pageref|auto-24>>
-
-      <tuple|normal|Dense point cloud generated by PMVS|<pageref|auto-25>>
     </associate>
     <\associate|toc>
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Introduction>
@@ -647,77 +619,49 @@
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-6>>
 
-      <with|par-left|<quote|2tab>|3.2.1<space|2spc>View Constrains
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Pipeline>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-7>>
+      <no-break><pageref|auto-7><vspace|0.5fn>
 
-      <with|par-left|<quote|2tab>|3.2.2<space|2spc>Normalized Eight Point
-      Algorithm (DLT) <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <with|par-left|<quote|1tab>|4.1<space|2spc>SIFT (Scale Invariant
+      Feature Transform) <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-8>>
 
-      <with|par-left|<quote|1tab>|3.3<space|2spc>Random Sample Processing
+      <with|par-left|<quote|1tab>|4.2<space|2spc>Robust Two-View Analysis
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-9>>
 
-      <with|par-left|<quote|1tab>|3.4<space|2spc>Non-Linear Approximation
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <with|par-left|<quote|1tab>|4.3<space|2spc>Incremental Camera
+      Registration <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-10>>
 
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|4<space|2spc>Structure
-      from Motion Pipeline> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-11><vspace|0.5fn>
-
-      <with|par-left|<quote|1tab>|4.1<space|2spc>SIFT feature generator
+      <with|par-left|<quote|1tab>|4.4<space|2spc>Sparse Bundle Adjustment
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-12>>
+      <no-break><pageref|auto-11>>
 
-      <with|par-left|<quote|1tab>|4.2<space|2spc>Feature matching
+      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Application
+      Framework> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      <no-break><pageref|auto-12><vspace|0.5fn>
+
+      <with|par-left|<quote|1tab>|5.1<space|2spc>Parallelization
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-13>>
 
-      <with|par-left|<quote|1tab>|4.3<space|2spc>Keypoint tracking
+      <with|par-left|<quote|1tab>|5.2<space|2spc>Data Model
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-14>>
 
-      <with|par-left|<quote|1tab>|4.4<space|2spc>Camera registration
+      <with|par-left|<quote|1tab>|5.3<space|2spc>Browser Related Details
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-15>>
 
-      <with|par-left|<quote|2tab>|4.4.1<space|2spc>Sparse Bundle Adjustment
+      <with|par-left|<quote|1tab>|5.4<space|2spc>Demos
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-16>>
 
-      <with|par-left|<quote|1tab>|4.5<space|2spc>Register the First Pair of
-      Cameras <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17>>
-
-      <with|par-left|<quote|1tab>|4.6<space|2spc>Incremetal Recovery
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-18>>
-
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Beyoned
-      Sparse> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-19><vspace|0.5fn>
-
-      <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|6<space|2spc>Application
-      Framework> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-20><vspace|0.5fn>
-
-      <with|par-left|<quote|1tab>|6.1<space|2spc>Parallelization
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-21>>
-
-      <with|par-left|<quote|1tab>|6.2<space|2spc>Browser Related Details
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-22>>
-
-      <with|par-left|<quote|1tab>|6.3<space|2spc>Samples
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-23>>
-
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Bibliography>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-26><vspace|0.5fn>
+      <no-break><pageref|auto-17><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>

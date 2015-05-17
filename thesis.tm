@@ -109,7 +109,7 @@
   the sparse bundle adjustment part is influenced by SBA<cite|lma>. WebSFM
   has 3 phases:
 
-  \;
+  <new-page>
 
   <section|Mathematical Context>
 
@@ -182,6 +182,8 @@
 
     <item><code*|Undistort the images accroding to (k1, k2).>
   </itemize>
+
+  <new-page>
 
   <section|Structure from Motion Pipeline>
 
@@ -271,7 +273,8 @@
     <strong|for each> <var|octave>:
 
     <\indent>
-      <var|scales space> := progressive blur base image of the <var|octave>
+      <var|scales space> := progressive blur the base image of current
+      <var|octave>
 
       <var|dog space> := subtract adjacent scales in <var|scale space>
 
@@ -284,16 +287,16 @@
         <var|subpixel> := interpolate <var|extrema> position in <var|dog
         space>, at <var|(x,y,scale)>
 
-        <var|orientations> := domiant orientations of gradient distribution
-        in <var|scale space>
+        <var|orientations> := domiant orientations of gradient histagram in
+        <var|sacle space>
 
         <strong|for each> <var|orientation> in <var|orientations>:
 
         <\indent>
-          <var|descriptor> := gradient distribution histagram at
-          <var|(subpixel,orientation)>
+          <var|descriptor> := gradient distribution histagram in <var|scale
+          space>
 
-          <var|features> append <var|(octave,subpixel,orientation,descriptor)>
+          <var|features> += <var|(octave,subpixel,orientation,descriptor)>
         </indent>
 
         <strong|end for>
@@ -363,6 +366,8 @@
   coordinates. Finally a global bundle adjustment is applied to refine the
   parameters, especially the focal length.
 
+  \;
+
   <subsection|Incremental Camera Registration>
 
   After the intial pair of cameras and tracks are registered, we can
@@ -417,7 +422,46 @@
     <item>Does not have multiply matches in a single view i.e distinct
   </itemize-dot>
 
-  <subsubsection|Sparse Bundle Adjustment>
+  <\named-algorithm>
+    Incremental Sparse Reconstruction
+  <|named-algorithm>
+    <var|tracks> := input
+
+    <var|recovered cameras> := initial sturcture
+
+    <var|recovered tracks> := initial structure
+
+    <var|candidates> := un-recovered cameras view at least 20 <var|recovered
+    tracks>
+
+    <strong|while> <var|candidates> avaliable
+
+    <\indent>
+      <var|selected> := candidate view the most <var|recovered tracks> and
+      those above 75 percentile
+
+      <var|new cameras> := recover camera models of <var|selected candidates>
+      using DLT
+
+      <var|recovered cameras> append <var|new cameras>
+
+      sparse bundle adjustment on <var|new cameras> and tracks they observe
+
+      <var|new tracks> := triangulate tracks at maxium view angle within
+      <var|recovered cameras>
+
+      <var|recovered tracks> += <var|new tracks>
+
+      global robust sparse += adjustment
+
+      <var|candidates> := un-recovered cameras view at least 20
+      <var|recovered tracks>
+    </indent>
+
+    <strong|end while>
+  </named-algorithm>
+
+  <subsection|Sparse Bundle Adjustment>
 
   <\named-algorithm|Robust Sparse Bundle Adjustment>
     <samp|<var|inliers>> := input tracks
@@ -427,7 +471,7 @@
     <strong|do>\ 
 
     <\indent>
-      <em|sparse bundle ajustment> on <var|cameras> and <var|inliers>
+      sparse bundle adjustment on <var|cameras> and <var|inliers>
 
       <strong|for each> <var|<math|camera<rsub|vi>>> in <var|cameras>:
 
@@ -441,6 +485,8 @@
         <samp|<math|<var|outliers<rsub|vi>>>> := tracks with reprojection
         error larger then <var|<math|threshold<rsub|vi>>>
       </indent>
+
+      <strong|end for>
 
       <var|outliers> := <var|<math|<big|cup>outliers<rsub|vi>>>
 
@@ -518,7 +564,7 @@
     <associate|auto-1|<tuple|1|2>>
     <associate|auto-10|<tuple|4.3|4>>
     <associate|auto-11|<tuple|4.4|5>>
-    <associate|auto-12|<tuple|4.4.1|5>>
+    <associate|auto-12|<tuple|4.5|5>>
     <associate|auto-13|<tuple|5|6>>
     <associate|auto-14|<tuple|5.1|6>>
     <associate|auto-15|<tuple|5.2|6>>

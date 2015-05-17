@@ -109,27 +109,7 @@
   the sparse bundle adjustment part is influenced by SBA<cite|lma>. WebSFM
   has 3 phases:
 
-  First is feature extraction. Image features are extracted using
-  Lowe's<cite|sift> SIFT. It uses Difference of Guassian of the grayscale
-  image to approximate Laplassian of Guassian of the image. Feature points
-  are first found in the Laplacian of Guassian then filtered, finally binded
-  with a descriptor. Features are scale/orientation invariant, which mean
-  they can be found and matched in arbitray scale and orientation.
-
-  Second is camera registration. We use the feature coorespondence between
-  images to calibrate the cameras i.e. estimate the camera parameters. First
-  we choose tracks i.e. globally unique and consistent feature matches. Then
-  set up the initial pair of cameras. Afterwards, cameras are calibrated
-  incrementally one after another, untill no reliable camera is left.
-
-  Finally is stereopsis. After cameras are calibrated, we can use stereo
-  vision to obtain dense point cloud. For each pair of cameras, rectify their
-  relative pose into standard stereo configuration, then search feature match
-  along the scan line which coincides epipolar line because of rectification.
-  Then merge the two view stereo together to form MVS (Multi-View Stereo).
-
-  Optionally, we can reconstruct surface or create mesh from the dense point
-  cloud.
+  \;
 
   <section|Mathematical Context>
 
@@ -202,8 +182,6 @@
 
     <item><code*|Undistort the images accroding to (k1, k2).>
   </itemize>
-
-  \;
 
   <section|Structure from Motion Pipeline>
 
@@ -284,6 +262,48 @@
   Afterwards, it will yield <math|16\<times\>8=128> numbers as the
   descripter. Finally, achive illumination invariant by normalizing the
   descriptor.
+
+  <\named-algorithm>
+    SIFT
+  <|named-algorithm>
+    <var|features> := empty array
+
+    <strong|for each> <var|octave>:
+
+    <\indent>
+      <var|scales space> := progressive blur base image of the <var|octave>
+
+      <var|dog space> := subtract adjacent scales in <var|scale space>
+
+      <strong|for each> <var|extrema> in <var|dog space>:
+
+      <\indent>
+        <strong|if> principal curvature of <var|extrema> is too big or
+        negative: <strong|break>
+
+        <var|subpixel> := interpolate <var|extrema> position in <var|dog
+        space>, at <var|(x,y,scale)>
+
+        <var|orientations> := domiant orientations of gradient distribution
+        in <var|scale space>
+
+        <strong|for each> <var|orientation> in <var|orientations>:
+
+        <\indent>
+          <var|descriptor> := gradient distribution histagram at
+          <var|(subpixel,orientation)>
+
+          <var|features> append <var|(octave,subpixel,orientation,descriptor)>
+        </indent>
+
+        <strong|end for>
+      </indent>
+
+      <strong|end for>
+    </indent>
+
+    <strong|end for>
+  </named-algorithm>
 
   SIFT will generate a huge amount of feature points, it will be used in both
   camera registration phase and stereopsis phase. But only a small subset of
@@ -409,18 +429,20 @@
     <\indent>
       <em|sparse bundle ajustment> on <var|cameras> and <var|inliers>
 
-      <strong|for each> camera <samp|vi>:
+      <strong|for each> <var|<math|camera<rsub|vi>>> in <var|cameras>:
 
       <\indent>
-        <math|d<rsub|80>> := 80 percentile of reprojection error
+        <var|<math|d<rsub|80>>> := 80 percentile of reprojection error on
+        <var|<math|camera<rsub|vi>>>
 
-        <var|threshold> := <math|clamp<around*|(|d<rsub|80>,4,16|)>>
+        <var|<math|threshold<rsub|vi>>> :=
+        <math|clamp<around*|(|d<rsub|80>,4,16|)>>
 
-        <samp|<math|outliers <rsub|vi> > >:= tracks with reprojection error
-        larger then <samp|threshold>
+        <samp|<math|<var|outliers<rsub|vi>>>> := tracks with reprojection
+        error larger then <var|<math|threshold<rsub|vi>>>
       </indent>
 
-      <var|outliers> := <samp|<math|<big|cup>outliers<rsub| vi>>>
+      <var|outliers> := <var|<math|<big|cup>outliers<rsub|vi>>>
 
       <var|inliers> := <var|inliers> - <var|outliers>
     </indent>

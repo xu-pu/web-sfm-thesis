@@ -37,27 +37,20 @@
 
   \;
 
-  <doc-data|<doc-title|Structure from Motion System in Modern Browsers>>
-
-  Pu Xu
+  <doc-data|<doc-title|Structure from Motion System in Modern
+  Browsers>|<doc-author|<author-data|<author-name|Xu
+  Pu>|<\author-affiliation>
+    ptx.digital
+  </author-affiliation>>>>
 
   <abstract-data|<\abstract>
-    3D scene reconstruction is a crucial aspect of computer vision. In this
-    paper, we will design a structure from motion system which take photos
-    took by regular pinehole cameras as input and runs inside a modern
-    bowser.\ 
+    This thesis aims at making a 3D reconstruction system inside modern
+    browser, WebSFM.
 
-    Photos took by regular digital camera i.e. pinhold camera model are the
-    most common and aboundant material for scene reconstruction. On the other
-    hand, the most pervasive computation platform is the web browser, which
-    is compatible with virtually every platform regardless the difference of
-    operating system or hardware. 3D scene reconstruction system on the most
-    pervasive platform - web browser, using the most common source material -
-    photos, minimized the requirements for this important task, has great
-    potential.
-
-    Keywords: structure from m<name|>otion, 3D scene analysis, javascript,
+    \;
   </abstract>>
+
+  \;
 
   <new-page>
 
@@ -204,8 +197,8 @@
   obtained.
 
   Currently WebSFM does not handle reconstruction beyoned sparse. PMVS/CMVS
-  can generate dense oriented point cloud, which can then be used to recover
-  surface polygon using Pission surface reconstruction.
+  <cite|pmvs> can generate dense oriented point cloud, which can then be used
+  to recover surface polygon using Pission surface reconstruction.
 
   <subsection|SIFT (Scale Invariant Feature Transform)><label|4.1>
 
@@ -256,7 +249,7 @@
     <strong|end for>
   </named-algorithm>
 
-  Octave space start at -1 or 0, start at -1 if image is too small. In each
+  Octave space start at -1 or 0, choose -1 if image is too small. In each
   octave, we will scan 3 DoG layers, which requires 5 layers in DoG space,
   and 6 layers in Guassian space. When bluring the image, larger sigma means
   larger kernel size, then directly leads to more time consumption, so blur
@@ -265,6 +258,15 @@
   <math|4\<times\>4\<times\>8> histagram and 128 dimensional Uint8 vector.
 
   <subsection|Robust Two-View Analysis><label|4.2>
+
+  the objective of <em|Robust Two-View Analysis> is to find robust two view
+  matches and accurate epipolar geometry i.e. fundamental matrix from sift
+  features of two images. we complish that by perform ANN <cite|ann> feature
+  matching on SIFT features, and use RANSAC with eight-point-algorithm to
+  make the dataset robust, then obtain an accurate estimation of fundamental
+  matrix from inliers.
+
+  ANN search\ 
 
   Two-view constrains:
 
@@ -367,13 +369,24 @@
 
   <subsection|Sparse Bundle Adjustment (SBA)>
 
-  the objective of <em|Sparse Bundle Adjustment (SBA)> is minimize projection
-  error of a sparse reconstruction by doing non-linear approximation on
-  camera paramters and 3D points. It is a modified implemention of
-  levenberg-marqurdt algorithm that take advantage of the sparse structure of
-  view geometry
+  The objective of <em|Sparse Bundle Adjustment (SBA)><cite|sba> is to
+  minimize projection error of a sparse reconstruction by perform non-linear
+  approximation on camera paramters and 3D points. It is a modified
+  implemention of <em|Levenberg-Marqurdt Algorithm> that take advantage of
+  the sparse structure of muti-view geometry.
 
-  Sparse sturcture is exploited when calculating jacobian and damped hessian.\ 
+  Sparse sturcture is exploited when calculating Jacobian, damped Hessian and
+  <math|\<b-delta\><rsub|p>>. When solving\ 
+
+  <\equation*>
+    <around*|(|H+d\<cdot\>I|)>\<cdot\>\<b-delta\><rsub|p>=\<b-epsilon\>
+  </equation*>
+
+  the damped Hessian can be splite in to <math|<matrix|<tformat|<table|<row|<cell|A>|<cell|B>>|<row|<cell|B<rsup|T>>|<cell|V>>>>>>
+  , where V is a block diagnal matrix, and equation can be solved using
+  Shur's component.
+
+  \;
 
   <small-figure|<image|<tuple|<#89504E470D0A1A0A0000000D49484452000000FD00000179080600000054632C86000007E049444154785EEDDDED6EA3561885D164EEFF9EA7722B2AE60CD8D8F107F0ACF5071B3019B5DA7AB78E8E93EFAFAFAFDF5F37FCFEFDFBEBFBFB7B3CFD872DF73CEAD6B36F5DBFD872CF2B5DFBF98F5E5B72EFFD17F77C66BC77FE7EBCB6C5DA67D6CE2FB9E7DEB92D9FBB76CFB56B936BF75CBBF60C6BFF6F7ECD6F02CE4FE821E632EF6FD67BE03C4C7A88117A88117A88117A88117A88117A88117A88F975D99E77311ED75EAF1D97CE8DC7C978FED671E9DCDA33C7F7D79EB1767EEDFAFCF5BDC7F1F5F87EBCFFD16B4BE7D67EEE96CF8CC7F1F5F87EEDDADA71CBEB5BC7A573E371EBB9F1B8746ECBB5A57B962C5D1B9F311E27E3F9F1B8F6DAA48718A18718DB7021C6A48718A18718A18718A18718A18718A18718A187987F433F6EDF5BDABA377FBD765C3A371E27E3F95BC7A5736BCF1CDF5F7BC6DAF9B5EBF3D7F71EC7D7E3FBF1FE47AF2D9D5BFBB95B3E331EC7D7E3FBB56B6BC72DAF6F1D97CE8DC7ADE7C6E3D2B92DD796EE59B2746D7CC6789C8CE7C7E3D26B931E62841E626CC38518931E62841E62841E62841E62841E62841E62841E6256433F6EF77B86773C737C7FCDAD7BC7EBE3FB477DEA39F7DE7FCBB5E75DBBB6E691CF6CF5CA676F75EDDF70EDDAE89E7B97AC861E3827A18718DB7021C6A48718A18718A18718A18718A18718A18718A18798B787FEA75B08B7B8E767DCBAF7D6F547BDEAB9B7BCF3E7BEF3671DC5B5FF26D7AE8DEEB977F4F6D0039F25F410631B2EC498F41023F41023F41023F41023F41023F41023F41023F4F066D7B6D05EBBF62C420F31420F31B6E1428C490F31420F31420F31420F31420F31420F31420F31420F1FF08EEDB66B841E62841E626CC38518931E62841E62841E62841E62841E62841E62841E627E5DB6037E724B20F05E263DC4083DC4FCBF0D77AAF8DFDF9753C05999F41023F410F3D7B7ECE62BF9AA3E9C8F490F31420F317FD5FB392BFA703E263DC4083DC45CADF7132BFA701E263DC4083DC46CAAF77356F4E1D84C7A88117A88B9BBDE4FD47C3826931E62841E621EAEF713351F8EC5A48718A187981FD7FB89FDF9700C263DC4083DC43CADDECF59D187FD32E92146E821E625F57EA2E6C3FE98F41023F410F3D27A3F996FDCB950F7E1734C7A88117A88794BBD1F59D587CF31E92146E821E623F57EA2E6C3FB99F41023F410F3D17A3F51F3E17D4C7A88117A88D945BD9FA8F9F07A263DC4083DC4ECAADE4FD47C781D931E62841E627659EF276A3E3C9F490F31420F31BBAEF7137F11179EC7A48718A1879843D4FB392BFAF033263DC4083DC41CAEDE4FACE8C3634C7A88117A88396CBD9F1BFF2AEE85CA0FCB4C7A88117A883945BD5F62130F2C33E92146E821E6B4F57EA2E6C39F4C7A88117A88397DBD9FD8AB0FFF31E92146E8212653EFE7C6BDFAEA3E25263DC4083DC424EBFDC8061E4A4C7A88117A8851EF67D47C0A4C7A88117A8851EF17D8BCC39999F41023F410A3DE6FE06BB99C89490F31420F31EAFD9D6CE0E1E84C7A88117A8851EF1FA4E67354263DC4083DC4A8F73FA4E67334263DC4083DC4A8F74FA2E67314263DC4083DC4A8F74FA6E6B377263DC4083DC4A8F72FA2E6B357263DC4083DC4A8F72FA6E6B337263DC4083DC4A8F76F32FEA9AC0B959F4F30E92146E82146BDFF202BFB7C82490F31420F31EAFD0EF8ABB8BC93490F31420F31EAFDCE58D1E7D54C7A88117A8851EF774ACDE7554C7A88117A8851EF77CEC61D9ECDA48718A18718F5FE40ACE8F30C263DC4083DC4A8F70764459F9F30E92146E82146BD3F382BFADCCBA48718A18718F5FE24D47CB632E92146E82146BD3F191B77B8C5A48718A18718F5FEC4ACE8B3C4A48718A18718F53E60BEA27FA1EEB799F41023F410A3DE0759D56F33E92146E82146BD0F53F39B4C7A88117A8851EFF175DC18931E62841E62D47BFE6045FFFC4C7A88117A8851EF59A4E69F97490F31420F31EA3D57A9F9E763D2438CD0438C7ACF266AFE7998F41023F410A3DE7317BF43FFF84C7A88117A8851EFF911BF75E7784C7A88117A8851EF799A7165FF42E5DF1F931E62841E62D47B5ECA9EFDFD31E92146E82146BDE72DD4FCFD30E92146E82146BDE7ADD4FCCF33E92146E82146BDE723D4FCCF31E92146E82146BDE7A3C6AFE3AAFBAF67D2438CD0438C7ACFAE58D57F3D931E62841E62D47B76C9EFD37F1D931E62841E62D47B76CF8AFE7399F41023F410A3DE73186AFE7398F41023F410A3DE73386AFECF98F41023F410A3DE73586AFE634C7A88117A8851EF393C5FC3BD8F490F31420F31EA3DA76245FF36931E62841E62D47B4E49CD5F67D2438CD0438C7ACFA9D9B8F337931E62841E62D47B32ACE8FFC7A48718A18718F59E9C7ACD37E92146E82146BD27ABBA71C7A48718A18718F51EBE5A2BFA263DC4083DC4A8F73053A8F9263DC4083DC4A8F7B0E0CC35DFA48718A18718F51EAE38E3FE7C931E62841E62D47BD8E82C2BFA263DC4083DC4A8F770A7A3D77C931E62841E62D47B78D05137EE98F41023F410A3DEC3131C6945DFA48718A18718F51E9EE80835DFA48718A18718F51E5E60CF35DFA48718A18718F51E5E68BE3F7FF4A9EA6FD2438CD0438C7A0F1FB256FD5F5DFB4D7A88117A8851EF61675EBDB1C7A48718A18718F51E76EA5535DFA48718A18718F51E76EED935DFA48718A18718F51E0E62DCABFF68DD37E92146E82146BD87837A7455DFA48718A18718F51E0EEEDE9A6FD2438CD0438C7A0F27B1B5E69BF41023F410A3DEC3C9DCAAF9263DC4083DC4A8F77052F3AFE2CEABBE490F31420F31EA3D04CCABBE490F31420F31FF00491D909EACFA2D6B0000000049454E44AE426082>|png>|253px|377px||>|sparse
   jacobian matrix><small-figure|<image|<tuple|<#89504E470D0A1A0A0000000D49484452000001790000017908060000007A035A3D0000087449444154785EEDDD8D4EE3461840D1A5EFFFCEB4D16EDA9425AC8D637BE6FA1C2952B51A08E4E7EACBD4366FEFFFF8F1CBDBDBDBFD3F79A1878778D163BC76FDAB2CB9DF57AD39CBB39FEDD9BF3F5AB2E69911BEF6992DDF73ED63F8CC96AF7DB4F6FB2C59BF64CDA3678FF992AFDDE2D9FDFEF5F11F00E8107980B0DBE787CF677C00A6679207081379803091070813798030910708137980309107085B759CFCDAD37BAB9E9D3E0C301A933C4098C80384ADDAAE01602E267980309107081379803091070813798030910708137980B0DD8E932F5F02C1650D805998E401C2441E206CB7ED1A00CE679207081379803091070813798030910708137980309107081BE238F9CA25108EFC3DCEBAAF474BEE77C9CFB9E5FBAFB5E4E7596BCBF7DCF2B54B3CFBFECFFE7D892D5FBBC559F7BBD696D7F31EBFA3491E204CE401C286D8AE01601F267980309107081379803091070813798030910708137980B0E98E93DFE3B4DF199DF538ACBDDF25EB97AC799523EF6B89B37E9EB3EEF70A5CD60080C3883C40D874DB35002C679207081379803091070813798030910708137980309107084B1F27BFC729C2005FD97259833D98E401C2441E202CBD5D03707526798030910708137980309107081379803091070813798030C7C9FFE21208C02B8CD612933C4098C80384D9AE010833C90384893C4098C80384893C4098C80384893C4098C80384AD3A4E7ECDE9BA6BD6CEA6FCBB012D2679803091070813F96FB86DD1DC6FB7AD9BFB0D6034220F1026F20061431C5DB366EDC82ABF07D061920708137980B021B66B8AAEFEFB036330C90384893C40D8DBFBC3BEC29FB615D66C41AC595BE7B100CE629207081379803047D71CCCE3021CC9240F1026F20061227FB0FB258A6FB7DBD6CDFD06B00791070813798030913F91AD1B606F220F1026F20061AE5D33208F1DF02A2679803091070873ED9AC1791C812D4CF20061220F1026F28373C214B085C80384893C40D81047D7ECB5B6CCE3002C61920708137980B021B66BD8C6630D3C6392070813798030910F70C214F08CC80384893C4098C8C7D8BA011E893C4098C80384897C98AD1B40E401C2441E204CE42FC2D60D5C93C80384893C4098C85F90AD1BB80E910708137980B0B7F787CFE97FFAAB428F1FE95FB9963178CEA0C7240F1026F20061FE90379FF2FC4183491E204CE401C286D8AE59B396E3797E605E26798030910708FB6BB66B97CCF6F316B8D60DCCCB240F1026F20061431C5DC39C3CC7303E933C4098C80384893CDFE6A81B189FC80384893C4098BF0CC5CB79EE611C267980309107081BE264A8BDD6723ECF179CCB240F1026F20061436CD7700D5E13703C933C4098C80384893C8771AD1B389EC80384893C40D81047D7ECB59639784E613F267980309107089B6EBB8636AF05782D933C4098C803840DB15D039FF11A82ED4CF20061220F1026F20CCBB56E603B9107081379803091670AB66EE07B441E204CE401C2449EE9D8BA81E5441E204CE401C2449EA9D9BA81AF893C4098C80384893C19B66EE077220F1026F20061224F92AD1BF849E401C2441E20ECEDFDE133ECEDA3ED571E3FEECEB0163EF2FAE16A4CF20061220F1076FBBCBAF89083351F75D7AC8533788D7205267980309107081BE2E81A389BD72B552679803091070873740D7CE0B54B89491E204CE401C2441E3EB86DD1DC6FB7AD9BFB0D6624F20061220F10E6642858C86B9A1999E401C2441E20CCC950F00D5EDFCCC2240F1026F20061436CD7AC590BA3F1FA6564267980309107081B62BB062ABCEE198D491E204CE401C2441E5EE87E89E2DBEDB67573BFC159441E204CE401C25C6A180EE0FDC0594CF20061220F10E664283898F7064732C90384893C40D810DB357BAD85D1793DB337933C4098C803840DB15D0378CFB00F933C4098C80384893C0CE2B64573BFDDB66EEE37D842E401C2441E20CCA5866170DE4B6C61920708137980302743C144BCAF58CB240F1026F20061220F1371C2146B893C4098C80384893C4CCAD60D4B883C4098C80384893C04D8BAE119910708137980B0212E35BC662DB09CF716267980309107081B62BB06D89FF7E43599E401C2441E206C88C8AF397963CD5AE03F4E98BAA621220FC03E441E20CC1FF2868BF35E6D33C90384893C4098C8C3C539EAA64DE401C2441E204CE4817FD9BAE9117980309107081379E053B66E1A441E204CE401C286F8CB506BD602E7F27E9D8B491E204CE401C25C6A18F836EFF3F199E401C2441E206C88A36B80F979CF8FC9240F1026F200618EAE015ECEFB7F1C267980309107081379E0E56E5B34F7DB6DEBE67EE378220F1026F20061220FECCAD6CDB9441E204CE401C2441E388CAD9BE3893C4098C80384B9D430703ABDD88F491E204CE401C25C6A18188A76BC96491E204CE401C2441E188A13A65E4BE401C2441E206C88A36BD6AC05AE4927BEC7240F1026F20061436CD700ACA12FCB99E401C2441E204CE481E938616A39910708137980307F190AC8D09DDF99E401C2441E20CCC950409206FD64920708137980309107929C30F593C80384893C4098C8037957DEBA1179803091070873ED1AE0B2AED029933C4098C80384B9760DC08F6EB34CF20061220F1026F2003FBA274C893C4098C8038439190AE00BB3B7CC240F1026F200614E86025868C6AE99E401C2441E204CE401169AF18429910708137980309107F88659B66E441E204CE401C286B876CD6C6B019E19AD252679803091070813F95F1EFF4F39C0778D76D48DC80384893C40984B0D031CE0AC269AE401C2441E204CE4010E70D65137220F1026F20061220F70B023B76E441E204CE401C28638196AAFB50033D9A36F267980309107081B62BB0680FF7B55434DF20061220F1026F200037AD50953220F1026F20061220F30B82D5B37220F1026F20061220F3091B55B37220F1026F200616FEF0F73FE9FAE8FB0E65A0A6BD602B0CDB3E69AE401C2441E204CE401029E1D7523F20061220F10F637630B0C904EA5745C0000000049454E44AE426082>|png>|377px|377px||>|sparse
@@ -381,8 +394,9 @@
 
   \;
 
-  <em|Robust SBA> is SBA with outiler filter, following is an overview of its
-  algorithm:
+  <em|Robust SBA> is SBA with outiler filter, it will refine the paramters
+  while exclude outliers until not outlier can bo found, following is an
+  overview of its algorithm:
 
   <\named-algorithm|Robust Sparse Bundle Adjustment>
     <samp|<var|inliers>> := input tracks
@@ -423,13 +437,7 @@
 
   <subsection|Parallelization>
 
-  Multiple short term threads are created dynamically by the WebSFM thread
-  according to the number of cores assigned to the application. They are
-  implemented to be asynchronous. Each represents a worker for a task with no
-  dynamic data dependency in the SFM system. For simplicity and performance
-  concern, we only extracted three tasks to be asynchronous and parallel, all
-  of them are well comfined in a specific scope -- a two-view pair or a
-  single image.
+  \;
 
   <subsection|Data Model>
 
@@ -456,14 +464,29 @@
   <subsection|Demos>
 
   <\bibliography|bib|tm-plain|thesis.bib>
-    <\bib-list|2>
-      <bibitem*|1><label|bib-sift>Distinctive image features from
-      scale-invariant keypoints.<newblock> <with|font-shape|italic|IJCV>, ,
-      2004.<newblock>
+    <\bib-list|5>
+      <bibitem*|1><label|bib-sift>David G.<nbsp>Lowe.<newblock> Distinctive
+      image features from scale-invariant keypoints.<newblock>
+      <with|font-shape|italic|IJCV>, , 2004.<newblock>
 
-      <bibitem*|2><label|bib-modeltheworld>Modeling the world from internet
+      <bibitem*|2><label|bib-sba>Antonis A. Argyros<nbsp>Manolis I.A
+      Lourakis.<newblock> The design and implementation of a generic sparse
+      bundle adjustment software package based on the levenberg-marquardt
+      algorithm.<newblock> <with|font-shape|italic|>, , 2004.<newblock>
+
+      <bibitem*|3><label|bib-modeltheworld>Richard Szeliski<nbsp>Noah
+      Snavely, Steven M. Seitz.<newblock> Modeling the world from internet
       photo collections.<newblock> <with|font-shape|italic|>, ,
       2007.<newblock>
+
+      <bibitem*|4><label|bib-ann>Nathan S. Netanyahu, Ruth Silverman, Angela
+      Y. Wu<nbsp>Sunil Arya, David M. Mount.<newblock> An optimal algorithm
+      for approximate nearest neighbor searching in fixed
+      dimensions.<newblock> <with|font-shape|italic|>. <newblock>
+
+      <bibitem*|5><label|bib-pmvs>Jean Ponce<nbsp>Yasutaka
+      Furukawa.<newblock> Accurate, dense, and robust multi-view
+      stereopsis.<newblock> <with|font-shape|italic|>. <newblock>
     </bib-list>
   </bibliography>
 </body>
@@ -484,10 +507,10 @@
     <associate|auto-11|<tuple|4.4|5>>
     <associate|auto-12|<tuple|2|6>>
     <associate|auto-13|<tuple|3|6>>
-    <associate|auto-14|<tuple|5|6>>
-    <associate|auto-15|<tuple|5.1|6>>
-    <associate|auto-16|<tuple|5.2|6>>
-    <associate|auto-17|<tuple|5.3|6>>
+    <associate|auto-14|<tuple|5|7>>
+    <associate|auto-15|<tuple|5.1|7>>
+    <associate|auto-16|<tuple|5.2|7>>
+    <associate|auto-17|<tuple|5.3|7>>
     <associate|auto-18|<tuple|5.4|7>>
     <associate|auto-19|<tuple|5.4|7>>
     <associate|auto-2|<tuple|2|2>>
@@ -515,11 +538,14 @@
     <associate|auto-7|<tuple|4|4>>
     <associate|auto-8|<tuple|4.1|4>>
     <associate|auto-9|<tuple|4.2|4>>
+    <associate|bib-ann|<tuple|4|7>>
     <associate|bib-handheld|<tuple|4|7>>
     <associate|bib-lma|<tuple|2|7>>
-    <associate|bib-modeltheworld|<tuple|2|6>>
+    <associate|bib-modeltheworld|<tuple|3|7>>
+    <associate|bib-pmvs|<tuple|5|7>>
     <associate|bib-pmvspaper|<tuple|1|?>>
-    <associate|bib-sift|<tuple|1|6>>
+    <associate|bib-sba|<tuple|2|7>>
+    <associate|bib-sift|<tuple|1|7>>
     <associate|section 4.2|<tuple|4.2|?>>
   </collection>
 </references>
@@ -533,10 +559,20 @@
 
       lma
 
+      pmvs
+
       sift
+
+      ann
+
+      sba
     </associate>
     <\associate|figure>
       <tuple|normal|Framework of WebSFM|<pageref|auto-3>>
+
+      <tuple|normal|sparse jacobian matrix|<pageref|auto-12>>
+
+      <tuple|normal|sparse damped hessian matrix|<pageref|auto-13>>
     </associate>
     <\associate|toc>
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Introduction>
@@ -576,32 +612,32 @@
       <no-break><pageref|auto-10>>
 
       <with|par-left|<quote|1tab>|4.4<space|2spc>Sparse Bundle Adjustment
-      <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
+      (SBA) <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
       <no-break><pageref|auto-11>>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Application
       Framework> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-12><vspace|0.5fn>
+      <no-break><pageref|auto-14><vspace|0.5fn>
 
       <with|par-left|<quote|1tab>|5.1<space|2spc>Parallelization
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-13>>
+      <no-break><pageref|auto-15>>
 
       <with|par-left|<quote|1tab>|5.2<space|2spc>Data Model
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-14>>
+      <no-break><pageref|auto-16>>
 
       <with|par-left|<quote|1tab>|5.3<space|2spc>Browser Related Details
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-15>>
+      <no-break><pageref|auto-17>>
 
       <with|par-left|<quote|1tab>|5.4<space|2spc>Demos
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-16>>
+      <no-break><pageref|auto-18>>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Bibliography>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17><vspace|0.5fn>
+      <no-break><pageref|auto-19><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>

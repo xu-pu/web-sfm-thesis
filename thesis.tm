@@ -252,48 +252,32 @@
 
   <subsection|Robust Two-View Analysis><label|4.2>
 
-  the objective of <em|Robust Two-View Analysis> is to find robust two view
-  matches and accurate epipolar geometry i.e. fundamental matrix from sift
-  features of two images. we complish that by perform ANN <cite|ann> feature
-  matching on SIFT features, and use RANSAC with eight-point-algorithm to
-  make the dataset robust, then obtain an accurate estimation of fundamental
-  matrix from inliers.
+  The objective of <em|Robust Two-View Analysis> is to find robust two-view
+  features matches and accurate epipolar geometry i.e. fundamental matrix
+  estimation from SIFT features of two images.
 
-  ANN search\ 
+  We need to first obtain the <em|approximate nearest neighbor
+  (ANN)><cite|ann> of SIFT features. Instead using a threshold of the
+  Euclidean distance of two descriptor to indicate a match, we use a priority
+  queue to match feature, and use a threshold on the ratio of distance
+  between the best match and the second match. We also use approximate
+  nearest neighbor search rather than strict for performance concern.
+  Features also need to be the ANN of <em|each other> to be accepted as a
+  match.
 
-  Two-view constrains:
+  Then we use two-view epipolar constrain to stablelize the matches. Each
+  pair of point coorespondence must satisfy
+  <math|<with|math-display|true|x<rsup|T><rsub|1>F
+  x<rsub|2>=0<with|math-display|false|>>>, where F is the fundamental matrix.
+  We exploit this attribute by combine RANSC and <em|normalized eight point
+  algorithm> to filter outliers, and then estimate the <em|fundamental
+  matrix> by SVD on the inliers and non-liear approximation by LMA.
 
-  <\itemize>
-    <item><code*|Fundamental Matrix(F)> --
-    <math|<with|math-display|true|x<rsup|T><rsub|1>F
-    x<rsub|2>=0<with|math-display|false|>>>
+  The result of <em|robust two-view analysis> can even be recoganized by
+  naked eyes after visualization.
 
-    <item><code*|Essential Matrix(E)> -- \ <math|<with|math-display|true|X<rsup|T><rsub|cam1>E
-    X<rsub|cam2>=0<with|math-display|false|>>>
-  </itemize>
-
-  Fundamental matrix is used for un-calibrated cameras, essential matrix is
-  used for calibrated cameras, their relation is <math|F=K<rsup|T><rsub|1>E
-  K<rsub|2>> .
-
-  To select the desirable tracks, first match features for each pair of
-  images. Instead using a threshold of the euclidean distance of two
-  descriptor to indicate a match, we use a nearest neighbor strategy. When
-  comparing two inages, for each feature in image 1, we find the 1st and 2nd
-  nearest feature in image 2 and compare the ratio of the euclidean distance,
-  \ if less then the ratio threshold, then accept as a match, which means
-  it's a match and the only match in this image. then, use view constrains to
-  filter the matches. for each image pair, use two view constrain,
-  fundamental matrx. use RANSAC to estimate the fundamental matrix and filter
-  outlier matches.
-
-  To satisfy the second requirment, we construct image connectivity graph
-  from all feature matches, tracks that contains multiple matches on a single
-  image will be discarded. In this process, not only inconsistencies are
-  filtered, we also merged two-view matches into a global image connectivity
-  graph and global tracks, which can be used in next phase.
-
-  <new-page>
+  <big-figure|<image|images/hall.matches.png|25%|25%||>|raw matches, robust
+  matches and epipolar lines>
 
   <subsection|Incremental Sparse Reconstruction><label|4.3>
 
@@ -529,6 +513,7 @@
 
 <\initial>
   <\collection>
+    <associate|figure-right-padding|5spc>
     <associate|info-flag|none>
     <associate|page-medium|paper>
   </collection>
@@ -538,24 +523,24 @@
   <\collection>
     <associate|4.1|<tuple|4.1|4>>
     <associate|4.2|<tuple|4.2|4>>
-    <associate|4.3|<tuple|4.3|6>>
+    <associate|4.3|<tuple|4.3|5>>
     <associate|auto-1|<tuple|1|2>>
     <associate|auto-10|<tuple|2|4>>
     <associate|auto-11|<tuple|4.2|4>>
-    <associate|auto-12|<tuple|4.3|6>>
-    <associate|auto-13|<tuple|3|6>>
-    <associate|auto-14|<tuple|4.4|7>>
-    <associate|auto-15|<tuple|4|7>>
-    <associate|auto-16|<tuple|5|7>>
-    <associate|auto-17|<tuple|5|8>>
-    <associate|auto-18|<tuple|5.1|8>>
-    <associate|auto-19|<tuple|5.2|8>>
+    <associate|auto-12|<tuple|3|5>>
+    <associate|auto-13|<tuple|4.3|5>>
+    <associate|auto-14|<tuple|4|5>>
+    <associate|auto-15|<tuple|4.4|6>>
+    <associate|auto-16|<tuple|5|6>>
+    <associate|auto-17|<tuple|6|6>>
+    <associate|auto-18|<tuple|5|7>>
+    <associate|auto-19|<tuple|5.1|7>>
     <associate|auto-2|<tuple|2|2>>
-    <associate|auto-20|<tuple|5.2|8>>
-    <associate|auto-21|<tuple|5.3|8>>
+    <associate|auto-20|<tuple|5.2|7>>
+    <associate|auto-21|<tuple|5.2|7>>
     <associate|auto-22|<tuple|5.3|8>>
-    <associate|auto-23|<tuple|3|8>>
-    <associate|auto-24|<tuple|3|8>>
+    <associate|auto-23|<tuple|5.3|8>>
+    <associate|auto-24|<tuple|5.3|8>>
     <associate|auto-25|<tuple|3|8>>
     <associate|auto-26|<tuple|3|8>>
     <associate|auto-27|<tuple|3|9>>
@@ -607,13 +592,16 @@
 
       <tuple|normal||<pageref|auto-10>>
 
-      <tuple|normal|result of sparse reconstruction|<pageref|auto-13>>
+      <tuple|normal|raw matches, robust matches and epipolar
+      lines|<pageref|auto-12>>
 
-      <tuple|normal|sparse jacobian matrix|<pageref|auto-15>>
+      <tuple|normal|result of sparse reconstruction|<pageref|auto-14>>
 
-      <tuple|normal|sparse damped hessian matrix|<pageref|auto-16>>
+      <tuple|normal|sparse jacobian matrix|<pageref|auto-16>>
 
-      <tuple|normal|WebSFM data model|<pageref|auto-20>>
+      <tuple|normal|sparse damped hessian matrix|<pageref|auto-17>>
+
+      <tuple|normal|WebSFM data model|<pageref|auto-21>>
     </associate>
     <\associate|toc>
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|1<space|2spc>Introduction>
@@ -650,31 +638,31 @@
 
       <with|par-left|<quote|1tab>|4.3<space|2spc>Incremental Sparse
       Reconstruction <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-12>>
+      <no-break><pageref|auto-13>>
 
       <with|par-left|<quote|1tab>|4.4<space|2spc>Sparse Bundle Adjustment
       (SBA) <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-14>>
+      <no-break><pageref|auto-15>>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|5<space|2spc>Application
       Framework> <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-17><vspace|0.5fn>
+      <no-break><pageref|auto-18><vspace|0.5fn>
 
       <with|par-left|<quote|1tab>|5.1<space|2spc>Parallelization
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-18>>
+      <no-break><pageref|auto-19>>
 
       <with|par-left|<quote|1tab>|5.2<space|2spc>Data Model
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-19>>
+      <no-break><pageref|auto-20>>
 
       <with|par-left|<quote|1tab>|5.3<space|2spc>Demos
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-21>>
+      <no-break><pageref|auto-22>>
 
       <vspace*|1fn><with|font-series|<quote|bold>|math-font-series|<quote|bold>|Bibliography>
       <datoms|<macro|x|<repeat|<arg|x>|<with|font-series|medium|<with|font-size|1|<space|0.2fn>.<space|0.2fn>>>>>|<htab|5mm>>
-      <no-break><pageref|auto-22><vspace|0.5fn>
+      <no-break><pageref|auto-23><vspace|0.5fn>
     </associate>
   </collection>
 </auxiliary>

@@ -482,6 +482,8 @@
 
   <subsection|Results>
 
+  <big-figure|<image|images/demo.png|800px|876px||>|screen shots of WebSFM>
+
   <\bibliography|bib|tm-plain|thesis.bib>
     <\bib-list|6>
       <bibitem*|1><label|bib-sift>David G.<nbsp>Lowe.<newblock> Distinctive
@@ -542,8 +544,8 @@
     <associate|auto-2|<tuple|2|2>>
     <associate|auto-20|<tuple|5.3|8>>
     <associate|auto-21|<tuple|5.4|8>>
-    <associate|auto-22|<tuple|5.4|8>>
-    <associate|auto-23|<tuple|5.4|9>>
+    <associate|auto-22|<tuple|5|8>>
+    <associate|auto-23|<tuple|5|9>>
     <associate|auto-24|<tuple|5.3|8>>
     <associate|auto-25|<tuple|3|8>>
     <associate|auto-26|<tuple|3|8>>
